@@ -18,7 +18,7 @@ tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 @tool
 def web_search(query : str) -> str:
     """Seach the web for recent and reliableinformation on a topic. Reterns Titles, URLs and snippets."""
-
+    print("Searching...", end = '')
     results = tavily.search(query=query, max_results=5)
     # to save tokens we take max_results
 
@@ -38,6 +38,7 @@ def web_search(query : str) -> str:
 @tool
 def scrape_url(url: str) -> str:
     """Scrape and return clean text content from a given URL for deeper reading."""
+    print("Scraping...", end = '')
     try:
         resp = requests.get(url, timeout=8, headers = {"User-Agent": "Mozilla/5.0"})
         # resp will have whole raw html

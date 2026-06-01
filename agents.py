@@ -43,6 +43,10 @@ Research Gathered:
 Structure the report as:
 - Introduction
 - Key Findings (minimum 3 well-explained points)
+- Important Statistics and Data
+- Expert Perspectives
+- Challenges and Risks
+- Emerging Trends and Future Outlook
 - Conclusion
 - Sources (list all URLs found in the research)
 
@@ -52,27 +56,36 @@ Be detailed, factual and professional."""),
 writer_chain = writer_prompt | llm | StrOutputParser()
 
 # Critic chain
+CRITIC_PROMPT = """
+Review below report rigorously.
+Report: {report}
+
+Check:
+- Accuracy
+- Missing information
+- Unsupported claims
+- Structure
+
+Return:
+
+SCORE: X/10
+
+ISSUES:
+- ...
+
+IMPROVEMENTS:
+- ...
+
+FINAL VERDICT:
+PASS or REVISE
+Only return PASS if:
+- Evidence is strong
+- No major unsupported claims exist
+- Coverage is comprehensive
+"""
 critic_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are a sharp and constructive research critic. Be honest and specific."),
-    ("human", """Review the research report below and evaluate it strictly.
-
-Report:
-{report}
-
-Respond in this exact format:
-
-Score: X/10
-
-Strengths:
-- ...
-- ...
-
-Areas to Improve:
-- ...
-- ...
-
-One line verdict:
-..."""),
+    ("human", CRITIC_PROMPT),
 ])
 
 critic_chain = critic_prompt | llm | StrOutputParser()
