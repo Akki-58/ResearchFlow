@@ -1,9 +1,16 @@
 from agents import build_reader_agent, build_search_agent, writer_chain, critic_chain
 
+from metrics import ResearchMetrics
+
+
 # base function
-def run_research_pipeline(topic: str) -> dict:
+def run_research_pipeline(topic: str,
+    max_revisions: int = 2) -> dict:
 
     state = {}
+
+    metrics = ResearchMetrics()
+    metrics.start()
 
     # search agent working
     print("\n"+ "-"*50)
@@ -76,6 +83,10 @@ Rules:
     })
     state["search_results"] = search_result["messages"][-1].content
 
+    metrics.count_search_sources(
+        state["search_results"]
+    )
+
     print("\n search result : ", state['search_results'])
 
     # reader agent
@@ -88,7 +99,7 @@ Rules:
 
 Topic:{topic}
 
-Search Results: {state['search_results'][:1000]}
+Search Results: {state['search_results']}
 
 Tasks:
 1. Identify all URLs present in the Search Results.
@@ -116,6 +127,11 @@ Do not invent information.
         "messages": [("user", READER_PROMPT)]
     })
     state['scrapped_content'] = reader_result['messages'][-1].content
+
+    metrics.count_scraped_sources(
+        state["scrapped_content"]
+    )
+
     print("\nScrapped Content: \n", state['scrapped_content'])
 
     # writer chain
@@ -128,26 +144,145 @@ Do not invent information.
         f"DETAILED SCRAPED CONTENT: \n {state['scrapped_content']}"
     )
 
-    state['report'] = writer_chain.invoke({
-        "topic" : topic,
-        "research": research_combined
-    })
+    # Writer + Critic Revision Loop
+    print("\n" + "-" * 50)
+    print("Step 3: Writer + Critic Revision Loop")
+    print("-" * 50)
 
-    print("\n Final Report\n", state['report'])
+    MAX_REVISIONS = max_revisions
 
-    # critic chain
-    print("\n"+ "-"*50)
-    print("Step 4: Critic is reviewing the report...")
-    print("-"*50)
+    previous_report = ""
+    feedback = ""
 
-    state["feedback"] = critic_chain.invoke({
-        "report": state["report"]
-    })
+    for iteration in range(MAX_REVISIONS + 1):
 
-    print("\n critic report \n", state['feedback'])
+        print(
+            f"\n--- Writing iteration "
+            f"{iteration + 1}/{MAX_REVISIONS + 1} ---"
+        )
+
+        # ----------------------------------------------
+        # Writer
+        # ----------------------------------------------
+
+        state["report"] = writer_chain.invoke({
+            "topic": topic,
+            "research_combined": research_combined,
+            "previous_report": previous_report,
+            "feedback": feedback
+        })
+
+        print("\nReport generated.")
+
+        # ----------------------------------------------
+        # Critic
+        # ----------------------------------------------
+
+        print("\nCritic is reviewing the report...")
+
+        state["feedback"] = critic_chain.invoke({
+            "topic": topic,
+            "research": research_combined,
+            "report": state["report"]
+        })
+
+        metrics.add_iteration(
+            iteration_number=iteration + 1,
+            report=state["report"],
+            feedback=state["feedback"]
+        )
+
+        print("\nCritic feedback:\n")
+        print(state["feedback"])
+
+        # ----------------------------------------------
+        # Check verdict
+        # ----------------------------------------------
+
+        critic_output = state["feedback"].upper()
+
+        if "FINAL VERDICT:" in critic_output:
+
+            verdict_section = critic_output.split(
+                "FINAL VERDICT:",
+                1
+            )[1].strip()
+
+            # Only inspect the first line after FINAL VERDICT
+            verdict = verdict_section.splitlines()[0].strip()
+
+        else:
+            verdict = ""
+
+        print(f"\nVerdict: {verdict}")
+
+        # ----------------------------------------------
+        # PASS
+        # ----------------------------------------------
+
+        if verdict == "PASS":
+            print("\n" + "-" * 50)
+            print("RESEARCH PASSED CRITIC REVIEW")
+            print("-" * 50)
+
+            state["revision_count"] = iteration
+
+            break
+
+        # ----------------------------------------------
+        # Maximum revisions reached
+        # ----------------------------------------------
+
+        if iteration >= MAX_REVISIONS:
+            print("\n" + "-" * 50)
+            print("MAXIMUM REVISIONS REACHED")
+            print("-" * 50)
+
+            state["revision_count"] = iteration
+            break
+
+        # ----------------------------------------------
+        # Prepare next revision
+        # ----------------------------------------------
+
+        previous_report = state["report"]
+        feedback = state["feedback"]
+
+        print("\nCritic requested revision.")
+        print("Sending feedback back to writer...")
+
+    # state['report'] = writer_chain.invoke({
+    #     "topic" : topic,
+    #     "research": research_combined
+    # })
+
+    # print("\n Final Report\n", state['report'])
+
+    # # critic chain
+    # print("\n"+ "-"*50)
+    # print("Step 4: Critic is reviewing the report...")
+    # print("-"*50)
+
+    # state["feedback"] = critic_chain.invoke({
+    #     "report": state["report"]
+    # })
+
+    # print("\n critic report \n", state['feedback'])
+
+    metrics.calculate_report_metrics(
+        state["report"]
+    )
+
+    metrics.stop()
+
+    state["metrics"] = metrics.calculate()
+
+    metrics.print_metrics()
 
     return state
+
 
 if __name__ == "__main__":
     topic = input("\nEnter a research topic: ") 
     run_research_pipeline(topic = topic)
+    # to save responses

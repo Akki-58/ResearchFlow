@@ -32,60 +32,185 @@ def build_reader_agent():
 
 # Writer Chain
 writer_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are an expert research writer. Write clear, structured and insightful reports."),
-    ("human", """Write a detailed research report on the topic below.
+    (
+        "system",
+        """You are an expert research writer.
 
-Topic: {topic}
+Write clear, structured, factual and insightful research reports.
+
+When critic feedback is provided, revise the report accordingly.
+Do not blindly accept the critic's suggestions if they contradict
+the supplied research evidence."""
+    ),
+    (
+        "human",
+        """Write a detailed research report on the topic below.
+
+Topic:
+{topic}
 
 Research Gathered:
-{research}
+{research_combined}
+
+Previous Report:
+{previous_report}
+
+Critic Feedback:
+{feedback}
+
+Instructions:
+
+1. If there is no Previous Report, create the report from scratch.
+2. If a Previous Report exists, revise it based on the Critic Feedback.
+3. Only make factual claims supported by the research.
+4. Remove unsupported claims.
+5. Fix missing information identified by the critic.
+6. Improve clarity, structure and factual accuracy.
+7. Preserve useful information from the previous report.
 
 Structure the report as:
+
 - Introduction
-- Key Findings (minimum 3 well-explained points)
+- Key Findings
+  - Minimum 3 well-explained points
 - Important Statistics and Data
 - Expert Perspectives
 - Challenges and Risks
 - Emerging Trends and Future Outlook
 - Conclusion
-- Sources (list all URLs found in the research)
+- Sources
 
-Be detailed, factual and professional."""),
+For Sources, list all URLs found in the research.
+
+Be detailed, factual and professional.
+
+Return ONLY the final research report."""
+    ),
 ])
+# writer_prompt = ChatPromptTemplate.from_messages([
+#     ("system", "You are an expert research writer. Write clear, structured and insightful reports."),
+#     ("human", """Write a detailed research report on the topic below.
+
+# Topic: {topic}
+
+# Research Gathered:
+# {research}
+
+# Structure the report as:
+# - Introduction
+# - Key Findings (minimum 3 well-explained points)
+# - Important Statistics and Data
+# - Expert Perspectives
+# - Challenges and Risks
+# - Emerging Trends and Future Outlook
+# - Conclusion
+# - Sources (list all URLs found in the research)
+
+# Be detailed, factual and professional."""),
+# ])
 
 writer_chain = writer_prompt | llm | StrOutputParser()
 
 # Critic chain
 CRITIC_PROMPT = """
-Review below report rigorously.
-Report: {report}
+Review the research report below rigorously.
+
+Topic:
+{topic}
+
+Research:
+{research}
+
+Report:
+{report}
 
 Check:
+
 - Accuracy
 - Missing information
 - Unsupported claims
+- Contradictions with the research
+- Source quality
 - Structure
+- Important statistics and data
+- Expert perspectives
+- Challenges and risks
+- Emerging trends
+- Whether the conclusion follows from the evidence
 
-Return:
+Return EXACTLY this format:
 
 SCORE: X/10
 
 ISSUES:
-- ...
+- issue 1
+- issue 2
+- issue 3
 
 IMPROVEMENTS:
-- ...
+- improvement 1
+- improvement 2
+- improvement 3
 
 FINAL VERDICT:
-PASS or REVISE
+PASS
+
+or:
+
+FINAL VERDICT:
+REVISE
+
 Only return PASS if:
+
 - Evidence is strong
-- No major unsupported claims exist
-- Coverage is comprehensive
+- There are no major unsupported claims
+- There are no important factual problems
+- Coverage is sufficiently comprehensive
+- The report is well structured
 """
+
+
 critic_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a sharp and constructive research critic. Be honest and specific."),
-    ("human", CRITIC_PROMPT),
+    (
+        "system",
+        "You are a sharp and constructive research critic. "
+        "Be honest, specific and evidence-based."
+    ),
+    (
+        "human",
+        CRITIC_PROMPT
+    ),
 ])
+# CRITIC_PROMPT = """
+# Review below report rigorously.
+# Report: {report}
+
+# Check:
+# - Accuracy
+# - Missing information
+# - Unsupported claims
+# - Structure
+
+# Return:
+
+# SCORE: X/10
+
+# ISSUES:
+# - ...
+
+# IMPROVEMENTS:
+# - ...
+
+# FINAL VERDICT:
+# PASS or REVISE
+# Only return PASS if:
+# - Evidence is strong
+# - No major unsupported claims exist
+# - Coverage is comprehensive
+# """
+# critic_prompt = ChatPromptTemplate.from_messages([
+#     ("system", "You are a sharp and constructive research critic. Be honest and specific."),
+#     ("human", CRITIC_PROMPT),
+# ])
 
 critic_chain = critic_prompt | llm | StrOutputParser()

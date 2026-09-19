@@ -1,0 +1,23 @@
+{
+    "benchmark_timestamp": "2026-08-23T16:43:34.613380",
+    "total_topics": 10,
+    "successful_runs": 5,
+    "failed_runs": 5,
+    "success_rate_percent": 50.0,
+    "total_benchmark_time_seconds": 1165.38,
+    "average_first_critic_score": 7.8,
+    "average_final_critic_score": 8.2,
+    "average_score_improvement": 0.4,
+    "best_final_score": 8.5,
+    "worst_final_score": 7.0,
+    "average_revisions": 2.0,
+    "max_revisions": 2,
+    "average_search_sources": 20.0,
+    "average_scraped_sources": 5.0,
+    "average_source_utilization_percent": 25.0,
+    "average_report_word_count": 3318.2,
+    "average_latency_seconds": 218.59,
+    "min_latency_seconds": 209.94,
+    "max_latency_seconds": 233.64,
+    "pass_rate_percent": 0.0
+}

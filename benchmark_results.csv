@@ -1,0 +1,11 @@
+actual_run_time_seconds,error,final_critic_score,final_verdict,first_critic_score,latency_seconds,pass_count,report_word_count,revise_count,revisions,run_id,score_improvement,scraped_sources,search_sources,source_utilization_percent,status,timestamp,topic,total_iterations
+210.15,,8.5,UNKNOWN,7.0,210.15,0,3523,0,2,1,1.5,5,20,25.0,SUCCESS,2026-08-23T16:27:39.384061,Impact of artificial intelligence on software engineering,3
+220.72,,8.5,UNKNOWN,8.5,220.72,0,2846,0,2,2,0.0,4,20,20.0,SUCCESS,2026-08-23T16:31:20.106117,Large language models in healthcare,3
+209.95,,7.0,UNKNOWN,7.5,209.94,0,2347,0,2,3,-0.5,8,20,40.0,SUCCESS,2026-08-23T16:34:50.055552,Future of autonomous vehicles,3
+218.56,,8.5,UNKNOWN,8.0,218.52,0,4591,0,2,4,0.5,3,20,15.0,SUCCESS,2026-08-23T16:38:28.618492,Cybersecurity risks of generative AI,3
+233.65,,8.5,UNKNOWN,8.0,233.64,0,3284,0,2,5,0.5,5,20,25.0,SUCCESS,2026-08-23T16:42:22.268711,AI agents and the future of automation,3
+65.24,Your request has been blocked due to excessive requests. Please reduce the rate of requests. Verify you are using production API keys.,,,,,,,,,6,,,,,FAILED,2026-08-23T16:43:27.512041,Renewable energy storage technologies,
+1.74,Your request has been blocked due to excessive requests. Please reduce the rate of requests. Verify you are using production API keys.,,,,,,,,,7,,,,,FAILED,2026-08-23T16:43:29.252548,Quantum computing applications,
+1.89,Your request has been blocked due to excessive requests. Please reduce the rate of requests. Verify you are using production API keys.,,,,,,,,,8,,,,,FAILED,2026-08-23T16:43:31.144882,AI regulation and governance,
+1.36,Your request has been blocked due to excessive requests. Please reduce the rate of requests. Verify you are using production API keys.,,,,,,,,,9,,,,,FAILED,2026-08-23T16:43:32.511504,Edge computing and artificial intelligence,
+2.1,Your request has been blocked due to excessive requests. Please reduce the rate of requests. Verify you are using production API keys.,,,,,,,,,10,,,,,FAILED,2026-08-23T16:43:34.613380,Future of robotics,

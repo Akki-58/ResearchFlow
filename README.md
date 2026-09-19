@@ -2,12 +2,13 @@
 
 AI-powered multi-agent research automation system built using LangChain and Mistral AI.
 
-ResearchFlow automates the process of:
+ResearchFlow automates the end-to-end research workflow by combining specialized AI agents for:
 
-* searching information
-* extracting insights
-* generating structured reports
-* evaluating report quality using critique agents
+- Web search and information retrieval
+- Content extraction and reading
+- Structured report generation
+- Automated critique and evaluation
+- Iterative report refinement
 
 The project demonstrates modern agentic AI workflow design using modular AI agents and LangChain Expression Language (LCEL).
 
@@ -18,7 +19,8 @@ The project demonstrates modern agentic AI workflow design using modular AI agen
 * Multi-agent architecture
 * Automated web research pipeline
 * Structured report generation
-* AI critique and evaluation system
+* AI-powered critique and evaluation
+* Writer-Critic revision loop
 * Modular tool integration
 * LangChain LCEL pipelines
 * Mistral AI integration
@@ -29,35 +31,52 @@ The project demonstrates modern agentic AI workflow design using modular AI agen
 # Architecture
 
 ```text
-                    ┌────────────────┐
-                    │  User Topic    │
-                    └──────┬─────────┘
-                           │
-                           ▼
-                ┌───────────────────┐
-                │   Search Agent    │
-                └────────┬──────────┘
-                         │
-                         ▼
-                ┌───────────────────┐
-                │   Reader Agent    │
-                └────────┬──────────┘
-                         │
-                         ▼
-                ┌───────────────────┐
-                │   Writer Chain    │
-                └────────┬──────────┘
-                         │
-                         ▼
-                ┌───────────────────┐
-                │   Critic Chain    │
-                └────────┬──────────┘
-                         │
-                         ▼
-                ┌───────────────────┐
-                │ Final Report      │
-                │ + Evaluation      │
-                └───────────────────┘
+                    ┌─────────────────────┐
+                    │      User Query     │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Search Agent      │
+                    │  • Tavily Search    │
+                    │  • 20 sources/query │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Reader Agent     │
+                    │ • BeautifulSoup     │
+                    │ • Extract relevant  │
+                    │   information       │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+              ┌────────────────────────────────┐
+              │         Writer Agent            │
+              │ • Synthesizes research          │
+              │ • Generates structured report   │
+              └────────────────┬───────────────┘
+                               │
+                               ▼
+              ┌────────────────────────────────┐
+              │         Critic Agent            │
+              │ • Checks quality                │
+              │ • Finds gaps / unsupported info │
+              └────────────────┬───────────────┘
+                               │
+                     Revision needed?
+                        /             \
+                      Yes              No
+                       │                │
+                       ▼                ▼
+                ┌─────────────┐   ┌─────────────┐
+                │   Writer    │   │ Final Report│
+                │  Revision   │   └─────────────┘
+                └──────┬──────┘
+                       │
+                       ▼
+                   Critic
+                 (2 cycles)
 ```
 
 ---
@@ -118,6 +137,14 @@ Evaluates:
 * completeness
 
 Provides feedback and scoring for the generated report.
+
+## 5. Writer-Critic Revision Loop
+
+ResearchFlow does not stop after the first generated draft.
+
+The system performs two Writer-Critic revision cycles before producing the final report.
+
+This creates a feedback-driven generation process rather than a single prompt-response workflow.
 
 ---
 
